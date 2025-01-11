@@ -15,6 +15,11 @@
     <div id="black-captures">0</div>
     <div id="white-captures">0</div>
 </div>
+<div>
+  <label><input type="radio" name="mode" value="switch" checked> 黒番でプレイヤーを切り替えるモード</label><br>
+  <label><input type="radio" name="mode" value="black-only"> 黒石を置くだけのモード</label><br>
+  <label><input type="radio" name="mode" value="white-only"> 白石を置くだけのモード</label>
+</div>
 <div><p>Click on board to play. See page source for implementation, and
   <a href="http://jgoboard.com">http://jgoboard.com</a> for details.</p></div>
 
@@ -28,16 +33,29 @@ var updateCaptures = function (node) {
 var jrecord = new JGO.Record(13);
 var jboard = jrecord.jboard;
 var jsetup = new JGO.Setup(jboard, JGO.BOARD.largeWalnut);
-var player = JGO.WHITE; // next player
+var player = JGO.BLACK; // next player
 var ko = false, lastMove = false; // ko coordinate and last move coordinate
 var lastHover = false, lastX = -1, lastY = -1; // hover helper vars
+var mode = "switch";
 
-jboard.setType(JGO.util.getHandicapCoordinates(jboard.width, 2), JGO.BLACK);
+// jboard.setType(JGO.util.getHandicapCoordinates(jboard.width, 2), JGO.BLACK);
+
+document.querySelectorAll('input[name="mode"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        mode = this.value; // 選択されたモードを取得
+    });
+});
 
 jsetup.setOptions({stars: {points:5}});
 jsetup.create('board', function(canvas) {
   canvas.addListener('click', function(coord, ev) {
     var opponent = (player == JGO.BLACK) ? JGO.WHITE : JGO.BLACK;
+
+    if (mode === "black-only") {
+        player = JGO.BLACK; // 常に黒石を置く
+    } else if (mode === "white-only") {
+        player = JGO.WHITE; // 常に白石を置く
+    }
 
     if(ev.shiftKey) { // on shift do edit
       if(jboard.getMark(coord) == JGO.MARK.NONE)
@@ -75,7 +93,11 @@ jsetup.create('board', function(canvas) {
         node.setMark(play.ko, JGO.MARK.CIRCLE); // mark ko, too
       ko = play.ko;
 
-      player = opponent;
+      if (mode === "switch") {
+            player = opponent; // プレイヤーを切り替え
+        }
+
+      // player = opponent;
       updateCaptures(node);
     } else alert('Illegal move: ' + play.errorMsg);
   });
