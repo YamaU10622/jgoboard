@@ -15,6 +15,13 @@
     <div id="black-captures">0</div>
     <div id="white-captures">0</div>
 </div>
+
+<div>
+  <label><input type="radio" name="board-size" value="9"> 9路盤</label><br>
+  <label><input type="radio" name="board-size" value="13"> 13路盤</label><br>
+  <label><input type="radio" name="board-size" value="19"> 19路盤</label>
+</div>
+
 <div><p>Click on board to play. See page source for implementation, and
   <a href="http://jgoboard.com">http://jgoboard.com</a> for details.</p></div>
 
@@ -25,14 +32,23 @@ var updateCaptures = function (node) {
   document.getElementById('black-captures').innerText = node.info.captures[JGO.BLACK];
   document.getElementById('white-captures').innerText = node.info.captures[JGO.WHITE];
 };
-var jrecord = new JGO.Record(13);
+
+var boardSize = 13;
+var jrecord,jboard,jsetup;
+
+function initializeBoard(size){
+boardSize = size;
+
+document.getElementById('board').innerHTML = '';
+
+var jrecord = new JGO.Record(boardSize);
 var jboard = jrecord.jboard;
 var jsetup = new JGO.Setup(jboard, JGO.BOARD.largeWalnut);
-var player = JGO.WHITE; // next player
+var player = JGO.BLACK; // next player
 var ko = false, lastMove = false; // ko coordinate and last move coordinate
 var lastHover = false, lastX = -1, lastY = -1; // hover helper vars
 
-jboard.setType(JGO.util.getHandicapCoordinates(jboard.width, 2), JGO.BLACK);
+// jboard.setType(JGO.util.getHandicapCoordinates(jboard.width, 2), JGO.BLACK);
 
 jsetup.setOptions({stars: {points:5}});
 jsetup.create('board', function(canvas) {
@@ -104,6 +120,20 @@ jsetup.create('board', function(canvas) {
     lastHover = false;
   });
 });
+  document.getElementById('black-captures').innerText = 0;
+  document.getElementById('white-captures').innerText = 0;
+}
+
+document.querySelectorAll('input[name="board-size"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        var newSize = parseInt(this.value, 10); // 選択されたサイズ
+        initializeBoard(newSize); // 碁盤を再生成
+    });
+});
+
+window.onload = function() {
+    initializeBoard(boardSize); 
+};
 </script>
 
 </body>
